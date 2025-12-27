@@ -16,10 +16,13 @@ builder.Services.AddWolverine(opts =>
     // Wolverine will automatically discover handlers in this assembly
     opts.Discovery.IncludeAssembly(typeof(Program).Assembly);
 
-    // Configure pipelines using policies
-    // Policies determine which middleware applies to which handlers
-    opts.Policies.Add<LoggingPolicy>();        // Apply logging to ALL handlers
-    opts.Policies.Add<TransactionPolicy>();    // Apply transactions to Commands only
+    // Configure pipelines using the simpler AddMiddleware approach
+    // Apply logging middleware to ALL handlers
+    opts.Policies.AddMiddleware<LoggingMiddleware>();
+
+    // Apply transaction middleware only to Commands (messages in the Commands namespace)
+    opts.Policies.AddMiddleware<TransactionMiddleware>(chain =>
+        chain.MessageType.Namespace?.Contains("Commands") == true);
 });
 
 // Register application services

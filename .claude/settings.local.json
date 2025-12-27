@@ -8,7 +8,10 @@
       "Bash(dotnet add:*)",
       "Bash(dotnet run:*)",
       "Bash(curl:*)",
-      "Bash(pkill:*)"
+      "Bash(pkill:*)",
+      "Bash(dotnet build:*)",
+      "WebSearch",
+      "WebFetch(domain:wolverinefx.net)"
     ]
   }
 }
