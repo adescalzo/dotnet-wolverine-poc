@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  # RabbitMQ for messaging
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: wolverine-rabbitmq
+    ports:
+      - "5673:5672"      # AMQP port (custom external port to avoid conflicts)
+      - "15673:15672"    # Management UI port (custom external port)
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - wolverine-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # PostgreSQL for outbox pattern and persistence
+  postgres:
+    image: postgres:17-alpine
+    container_name: wolverine-postgres
+    ports:
+      - "5433:5432"      # Custom external port to avoid conflicts
+    environment:
+      POSTGRES_USER: wolverine
+      POSTGRES_PASSWORD: wolverine_pass
+      POSTGRES_DB: wolverine_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - wolverine-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U wolverine"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis for caching and distributed locking
+  redis:
+    image: redis:7-alpine
+    container_name: wolverine-redis
+    ports:
+      - "6380:6379"      # Custom external port to avoid conflicts
+    volumes:
+      - redis_data:/data
+    networks:
+      - wolverine-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: redis-server --appendonly yes
+
+volumes:
+  rabbitmq_data:
+    driver: local
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  wolverine-network:
+    driver: bridge

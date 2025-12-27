@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/01-Mediator-PoC/">
+    <Project Path="01-Mediator-PoC/MediatorPoC.csproj" />
+  </Folder>
+  <Folder Name="/02-Messaging-PoC/">
+    <Project Path="02-Messaging-PoC/MessagingPoC.csproj" />
+  </Folder>
+  <Folder Name="/03-Outbox-PoC/">
+    <Project Path="03-Outbox-PoC/OutboxPoC.csproj" />
+  </Folder>
+</Solution>

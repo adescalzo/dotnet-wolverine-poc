@@ -1,0 +1,84 @@
+### Wolverine Outbox Pattern PoC - API Tests
+### Use with VS Code REST Client extension or similar
+### Requires: PostgreSQL and Redis running (docker-compose up -d postgres redis)
+
+@baseUrl = http://localhost:5000
+
+### Get API information
+GET {{baseUrl}}/
+
+### Create a payment
+# @name createPayment
+POST {{baseUrl}}/payments
+Content-Type: application/json
+
+{
+  "userId": "user123",
+  "amount": 150.00,
+  "currency": "USD"
+}
+
+### Get the created payment ID
+@paymentId = {{createPayment.response.body.$.id}}
+
+### Get all payments
+GET {{baseUrl}}/payments
+
+### Get payment by ID
+GET {{baseUrl}}/payments/{{paymentId}}
+
+### Get payments by user
+GET {{baseUrl}}/payments/user/user123
+
+### Check payment status in cache (should show "initiated")
+GET {{baseUrl}}/payments/{{paymentId}}/cache
+
+### Process the payment
+POST {{baseUrl}}/payments/{{paymentId}}/process
+
+### Check cache again (should show "completed")
+GET {{baseUrl}}/payments/{{paymentId}}/cache
+
+### Create a payment to fail
+# @name failPayment
+POST {{baseUrl}}/payments
+Content-Type: application/json
+
+{
+  "userId": "user456",
+  "amount": 250.00,
+  "currency": "EUR"
+}
+
+###
+@failPaymentId = {{failPayment.response.body.$.id}}
+
+### Mark payment as failed
+POST {{baseUrl}}/payments/{{failPaymentId}}/fail?reason=Insufficient%20funds
+
+### Check failed payment status in cache
+GET {{baseUrl}}/payments/{{failPaymentId}}/cache
+
+### Create a payment to refund
+# @name refundPayment
+POST {{baseUrl}}/payments
+Content-Type: application/json
+
+{
+  "userId": "user789",
+  "amount": 99.99,
+  "currency": "USD"
+}
+
+###
+@refundPaymentId = {{refundPayment.response.body.$.id}}
+
+### Process it first
+POST {{baseUrl}}/payments/{{refundPaymentId}}/process
+
+### Wait a moment for processing
+### Then refund the payment
+POST {{baseUrl}}/payments/{{refundPaymentId}}/refund?reason=Customer%20request
+
+### Check refunded payment status in cache
+GET {{baseUrl}}/payments/{{refundPaymentId}}/cache

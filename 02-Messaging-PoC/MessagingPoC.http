@@ -1,0 +1,6 @@
+@MessagingPoC_HostAddress = http://localhost:5228
+
+GET {{MessagingPoC_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

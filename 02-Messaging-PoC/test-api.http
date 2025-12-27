@@ -1,0 +1,57 @@
+### Wolverine Messaging PoC - API Tests
+### Use with VS Code REST Client extension or similar
+
+@baseUrl = http://localhost:5000
+
+### Get API information
+GET {{baseUrl}}/
+
+### Create an order
+# @name createOrder
+POST {{baseUrl}}/orders
+Content-Type: application/json
+
+{
+  "customerName": "John Doe",
+  "items": ["Laptop", "Mouse", "Keyboard"],
+  "totalAmount": 1299.99
+}
+
+### Get the created order ID
+@orderId = {{createOrder.response.body.$.id}}
+
+### Get all orders
+GET {{baseUrl}}/orders
+
+### Get order by ID
+GET {{baseUrl}}/orders/{{orderId}}
+
+### Ship the order
+POST {{baseUrl}}/orders/{{orderId}}/ship
+
+### Cancel an order (create a new one first)
+POST {{baseUrl}}/orders
+Content-Type: application/json
+
+{
+  "customerName": "Jane Smith",
+  "items": ["Phone Case"],
+  "totalAmount": 29.99
+}
+
+###
+# @name orderToCancel
+POST {{baseUrl}}/orders
+Content-Type: application/json
+
+{
+  "customerName": "Bob Johnson",
+  "items": ["Tablet"],
+  "totalAmount": 599.99
+}
+
+###
+@cancelOrderId = {{orderToCancel.response.body.$.id}}
+
+### Cancel the order
+POST {{baseUrl}}/orders/{{cancelOrderId}}/cancel
